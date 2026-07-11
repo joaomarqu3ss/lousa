@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lousa</title>
+    <script>
+      // Self-host Excalidraw's assets (see vite.config.ts) so the Canvas
+      // works fully offline — a desktop app must never depend on a CDN.
+      window.EXCALIDRAW_ASSET_PATH = "/";
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
