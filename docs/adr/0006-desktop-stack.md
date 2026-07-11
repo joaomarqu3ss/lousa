@@ -1,0 +1,5 @@
+# Desktop stack: Tauri 2 + Vite + TypeScript strict + React 19 + pnpm
+
+Lousa is a Tauri 2 app — Rust backend, React frontend in the system webview, IPC between them — targeting Windows and Linux (macOS deferred). Frontend toolchain: Vite, TypeScript with `strict: true`, React 19 (dropping to 18 only if the Excalidraw embed's peer range demands it), pnpm. No state-management library in v1 — React state plus Excalidraw's own state carry a single-document shell; revisit when Modules need a shared bus. The Rust side is a single crate in `src-tauri/` with commands split into modules; a Cargo workspace is deliberate future structure, not day-one structure.
+
+Quality baseline from day one: Vitest for our own frontend logic (never for Excalidraw itself), `cargo test` for the Rust side, ESLint + Prettier, clippy + rustfmt, and GitHub Actions CI running lint + test + bundle build on `ubuntu-latest` and `windows-latest` — the cross-OS promise enforced on every PR. E2E via `tauri-driver` is deferred until the regression surface justifies its setup cost.

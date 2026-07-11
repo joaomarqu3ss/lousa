@@ -1,0 +1,3 @@
+# Distribution: NSIS (unsigned), AppImage, deb, rpm; no auto-updater
+
+Windows ships as an unsigned NSIS `.exe` installer — code-signing certificates cost real money, so we accept SmartScreen warnings until the project earns signing. Linux ships AppImage, `.deb`, and `.rpm` (rpm included because the maintainer runs Fedora). Flatpak/Snap and the Tauri auto-updater (which requires signed manifests and a hosting endpoint) are deliberately deferred until there are users to serve; v1 users update by reinstalling. The bundle identifier is `io.github.joaomarqu3ss.lousa` — set once, painful to change after users have config dirs on disk.
