@@ -1,29 +1,12 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [
-    react(),
-    // Self-host Excalidraw's assets so the app works fully offline
-    // (paired with window.EXCALIDRAW_ASSET_PATH = "/" in index.html).
-    viteStaticCopy({
-      targets: [
-        {
-          src: "node_modules/@excalidraw/excalidraw/dist/prod/fonts",
-          dest: ".",
-        },
-        {
-          src: "node_modules/@excalidraw/excalidraw/dist/prod/locales",
-          dest: ".",
-        },
-      ],
-    }),
-  ],
+  plugins: [react()],
 
   test: {
     environment: "node",

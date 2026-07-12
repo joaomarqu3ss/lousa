@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Excalidraw assets synced from node_modules (scripts/sync-excalidraw-assets.mjs)
+public/fonts
+public/locales
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

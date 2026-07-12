@@ -14,4 +14,10 @@ export default tseslint.config(
       "react-hooks/exhaustive-deps": "error",
     },
   },
+  {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: { console: "readonly", URL: "readonly", process: "readonly" },
+    },
+  },
 );
