@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{mpsc, LazyLock, Mutex};
 use std::time::Duration;
 
-use interprocess::local_socket::traits::{ListenerExt as _, Stream as _};
+use interprocess::local_socket::traits::ListenerExt as _;
 use interprocess::local_socket::{Listener, ListenerOptions, Stream};
 use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
@@ -53,20 +53,29 @@ fn bind() -> std::io::Result<Listener> {
         .name(super::socket_name()?)
         .create_sync()
     {
-        // A crashed app leaves a stale socket file behind on Unix. If nothing
-        // answers on it, remove it and bind again.
-        #[cfg(unix)]
-        Err(err) if err.kind() == std::io::ErrorKind::AddrInUse => {
-            if Stream::connect(super::socket_name()?).is_ok() {
-                return Err(err); // a live instance owns it — leave it alone
-            }
-            std::fs::remove_file(super::socket_path())?;
-            ListenerOptions::new()
-                .name(super::socket_name()?)
-                .create_sync()
-        }
+        Err(err) if err.kind() == std::io::ErrorKind::AddrInUse => recover_address_in_use(err),
         other => other,
     }
+}
+
+/// A crashed app leaves a stale socket file behind on Unix. If nothing
+/// answers on it, remove it and bind again.
+#[cfg(unix)]
+fn recover_address_in_use(original: std::io::Error) -> std::io::Result<Listener> {
+    use interprocess::local_socket::traits::Stream as _;
+    if Stream::connect(super::socket_name()?).is_ok() {
+        return Err(original); // a live instance owns it — leave it alone
+    }
+    std::fs::remove_file(super::socket_path())?;
+    ListenerOptions::new()
+        .name(super::socket_name()?)
+        .create_sync()
+}
+
+/// Windows named pipes die with their owning process — no stale-pipe case.
+#[cfg(windows)]
+fn recover_address_in_use(original: std::io::Error) -> std::io::Result<Listener> {
+    Err(original)
 }
 
 fn handle_connection(app: &AppHandle, stream: &Stream) {
