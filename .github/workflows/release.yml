@@ -1,0 +1,66 @@
+name: Release
+
+# Push a version tag to build installers and attach them to a GitHub Release:
+#   git tag v0.1.0 && git push origin v0.1.0
+# The release is created as a DRAFT — the binaries build automatically, but
+# nothing is public until you press "Publish" on the release page.
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    permissions:
+      contents: write # needed to create the release and upload assets
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-latest
+            args: "--bundles appimage,deb,rpm"
+          - platform: windows-latest
+            args: "--bundles nsis"
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Lousa ${{ github.ref_name }}"
+          releaseBody: |
+            Desktop builds for Windows and Linux.
+
+            - **Windows**: download the `.exe` and run it. Unsigned, so Windows
+              SmartScreen will warn — choose "More info" → "Run anyway".
+            - **Linux (any distro)**: download the `.AppImage`, `chmod +x` it, and run.
+            - **Debian/Ubuntu**: the `.deb`. **Fedora/RHEL**: the `.rpm`.
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
