@@ -10,6 +10,7 @@ import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ask } from "@tauri-apps/plugin-dialog";
 import { pickOpenPath, pickSavePath, readDocument, saveDocument } from "./lib/document";
+import { exportScene } from "./lib/export";
 import { windowTitle } from "./lib/title";
 import "@excalidraw/excalidraw/index.css";
 import "./App.css";
@@ -112,6 +113,21 @@ function App() {
     markClean();
   }, [api, confirmDiscard, markClean]);
 
+  const runExport = useCallback(
+    async (format: "svg" | "png" | "jpeg" | "pdf") => {
+      if (!api) return;
+      try {
+        const path = await exportScene(api, format);
+        if (path) {
+          api.setToast({ message: `Exported ${format.toUpperCase()}`, duration: 3000 });
+        }
+      } catch (err) {
+        reportError(`${format.toUpperCase()} export failed`, err);
+      }
+    },
+    [api, reportError],
+  );
+
   // Native window title reflects the document and its dirty state.
   useEffect(() => {
     void getCurrentWindow().setTitle(windowTitle(filePath, dirty));
@@ -169,6 +185,17 @@ function App() {
           <MainMenu.Item onSelect={() => void saveAs()} shortcut="Ctrl+Shift+S">
             Save As…
           </MainMenu.Item>
+          <MainMenu.Separator />
+          <MainMenu.Group title="Export">
+            <MainMenu.Item onSelect={() => void runExport("svg")}>Export SVG…</MainMenu.Item>
+            <MainMenu.Item onSelect={() => void runExport("png")}>
+              Export PNG (high-res)…
+            </MainMenu.Item>
+            <MainMenu.Item onSelect={() => void runExport("jpeg")}>
+              Export JPEG (high-res)…
+            </MainMenu.Item>
+            <MainMenu.Item onSelect={() => void runExport("pdf")}>Export PDF…</MainMenu.Item>
+          </MainMenu.Group>
           <MainMenu.Separator />
           <MainMenu.DefaultItems.ToggleTheme />
         </MainMenu>

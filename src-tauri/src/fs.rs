@@ -17,7 +17,9 @@ pub fn save_document(path: String, contents: String) -> Result<(), String> {
         .map_err(|err| format!("failed to save {path}: {err}"))
 }
 
-fn atomic_write(target: &Path, bytes: &[u8]) -> std::io::Result<()> {
+/// Write `bytes` to `target` atomically: a crash mid-write leaves the existing
+/// file untouched. Shared by document saves and exports (`export` module).
+pub(crate) fn atomic_write(target: &Path, bytes: &[u8]) -> std::io::Result<()> {
     let tmp = temp_sibling(target);
     let mut file = fs::File::create(&tmp)?;
     file.write_all(bytes)?;

@@ -1,3 +1,4 @@
+mod export;
 mod fs;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -6,7 +7,9 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             fs::read_document,
-            fs::save_document
+            fs::save_document,
+            export::write_binary_file,
+            export::export_pdf
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
