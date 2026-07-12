@@ -1,12 +1,20 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "lousa",
   "description": "Lousa — live whiteboard tools for AI agents",
+  "owner": {
+    "name": "joaomarqu3ss"
+  },
   "plugins": [
     {
       "name": "lousa",
       "description": "Draw system-design diagrams on the live Lousa whiteboard from Claude Code",
       "version": "0.2.0",
-      "source": "./claude-plugin"
+      "author": {
+        "name": "joaomarqu3ss"
+      },
+      "source": "./claude-plugin",
+      "homepage": "https://github.com/joaomarqu3ss/lousa"
     }
   ]
 }
