@@ -49,7 +49,10 @@ fn serve(app: AppHandle) -> std::io::Result<()> {
 }
 
 fn bind() -> std::io::Result<Listener> {
-    match ListenerOptions::new().name(super::socket_name()?).create_sync() {
+    match ListenerOptions::new()
+        .name(super::socket_name()?)
+        .create_sync()
+    {
         // A crashed app leaves a stale socket file behind on Unix. If nothing
         // answers on it, remove it and bind again.
         #[cfg(unix)]
@@ -58,7 +61,9 @@ fn bind() -> std::io::Result<Listener> {
                 return Err(err); // a live instance owns it — leave it alone
             }
             std::fs::remove_file(super::socket_path())?;
-            ListenerOptions::new().name(super::socket_name()?).create_sync()
+            ListenerOptions::new()
+                .name(super::socket_name()?)
+                .create_sync()
         }
         other => other,
     }
@@ -100,7 +105,11 @@ fn handle_message(app: &AppHandle, raw: &str) -> Option<Value> {
         Err(_) => return Some(error_response(Value::Null, -32700, "parse error")),
     };
     let id = msg.get("id").cloned()?;
-    let result = match msg.get("method").and_then(Value::as_str).unwrap_or_default() {
+    let result = match msg
+        .get("method")
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+    {
         "ping" => json!({}),
         "tools/call" => {
             let name = msg

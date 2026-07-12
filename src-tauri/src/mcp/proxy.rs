@@ -32,7 +32,10 @@ pub fn run() -> ! {
                 continue;
             }
         };
-        let method = msg.get("method").and_then(Value::as_str).unwrap_or_default();
+        let method = msg
+            .get("method")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
         let Some(id) = msg.get("id").cloned() else {
             continue; // notifications (e.g. notifications/initialized) need no reply
         };
@@ -68,7 +71,11 @@ pub fn run() -> ! {
                     )),
                 }
             }
-            _ => respond(&error_response(id, -32601, &format!("method not found: {method}"))),
+            _ => respond(&error_response(
+                id,
+                -32601,
+                &format!("method not found: {method}"),
+            )),
         }
     }
     std::process::exit(0);
