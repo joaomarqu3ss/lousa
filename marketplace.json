@@ -5,7 +5,7 @@
     {
       "name": "lousa",
       "description": "Draw system-design diagrams on the live Lousa whiteboard from Claude Code",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./claude-plugin"
     }
   ]

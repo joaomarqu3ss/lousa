@@ -2,7 +2,7 @@
   "name": "lousa",
   "displayName": "Lousa",
   "description": "Draw system-design diagrams on the live Lousa whiteboard from Claude Code",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": { "name": "joaomarqu3ss" },
   "homepage": "https://github.com/joaomarqu3ss/lousa",
   "repository": "https://github.com/joaomarqu3ss/lousa",

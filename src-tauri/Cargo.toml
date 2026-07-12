@@ -1,6 +1,6 @@
 [package]
 name = "lousa"
-version = "0.1.2"
+version = "0.2.0"
 description = "Lousa — a study whiteboard desktop platform"
 authors = ["joaomarqu3ss"]
 edition = "2021"
