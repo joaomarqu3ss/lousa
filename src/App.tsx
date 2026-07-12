@@ -14,6 +14,7 @@ import { exportScene } from "./lib/export";
 import { windowTitle } from "./lib/title";
 import { useTheme } from "./lib/useTheme";
 import { useCustomTheme } from "./lib/useCustomTheme";
+import { useAgentBridge } from "./lib/agentBridge/useAgentBridge";
 import { SettingsPanel } from "./components/SettingsPanel";
 import "@excalidraw/excalidraw/index.css";
 import "./App.css";
@@ -39,6 +40,9 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const theme = useTheme();
   const customTheme = useCustomTheme();
+  const bridge = useAgentBridge(api);
+  // Stable identity (useCallback in the hook) — safe as an effect dependency.
+  const dropCheckpoint = bridge.keep;
 
   // Scene version of the last saved (or freshly loaded/empty) state.
   const savedVersion = useRef(0);
@@ -126,17 +130,21 @@ function App() {
       api.history.clear();
       setFilePath(path);
       markClean();
+      // A checkpoint belongs to the Canvas it snapshotted — never let Revert
+      // inject a previous Document's elements into this one.
+      dropCheckpoint();
     } catch (err) {
       reportError("Open failed", err);
     }
-  }, [api, confirmDiscard, markClean, reportError, theme.resolved]);
+  }, [api, confirmDiscard, markClean, reportError, theme.resolved, dropCheckpoint]);
 
   const newDocument = useCallback(async () => {
     if (!api || !(await confirmDiscard())) return;
     api.resetScene();
     setFilePath(null);
     markClean();
-  }, [api, confirmDiscard, markClean]);
+    dropCheckpoint(); // same reason as openDocument
+  }, [api, confirmDiscard, markClean, dropCheckpoint]);
 
   const runExport = useCallback(
     async (format: "svg" | "png" | "jpeg" | "pdf") => {
@@ -239,6 +247,17 @@ function App() {
           customTheme={customTheme}
           onClose={() => setSettingsOpen(false)}
         />
+      )}
+      {bridge.revertAvailable && (
+        <div className="agent-banner" role="status">
+          <span>AI changed the Canvas</span>
+          <button type="button" onClick={bridge.revert}>
+            Revert AI changes
+          </button>
+          <button type="button" className="agent-banner-keep" onClick={bridge.keep}>
+            Keep
+          </button>
+        </div>
       )}
     </div>
   );

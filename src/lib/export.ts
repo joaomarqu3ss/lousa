@@ -41,7 +41,7 @@ async function pickPath(format: ExportFormat): Promise<string | null> {
 }
 
 /** Base64 (without the data-URL prefix) — reliable for large blobs, unlike btoa. */
-function blobToBase64(blob: Blob): Promise<string> {
+export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve((reader.result as string).split(",", 2)[1]);

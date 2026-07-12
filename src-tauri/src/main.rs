@@ -2,6 +2,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
+    // `lousa --mcp` runs this binary as the MCP stdio proxy for an external
+    // agent instead of launching the app (ADR-0011). Branch before any GUI
+    // or env setup: the proxy must work headless.
+    if std::env::args().any(|arg| arg == "--mcp") {
+        lousa_lib::mcp::proxy::run();
+    }
+
     // WebKitGTK's DMA-BUF renderer crashes the webview on Wayland + NVIDIA
     // (GDK "Error 71" at window creation) because of the driver's explicit-sync
     // protocol. Disabling explicit sync avoids the crash while keeping the

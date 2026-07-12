@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { normalizeHex } from "../lib/color";
 import { DEFAULT_PALETTE } from "../lib/palette";
 import type { CustomTheme } from "../lib/customTheme";
@@ -66,6 +67,51 @@ function ColorField({ label, hint, value, fallback, onChange }: ColorFieldProps)
         </button>
       </div>
     </div>
+  );
+}
+
+/** One copyable configuration line with visual copied feedback. */
+function CopyRow({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="settings-copy">
+      <span className="settings-copy__label">{label}</span>
+      <code className="settings-copy__value">{value}</code>
+      <button
+        type="button"
+        className="settings-copy__button"
+        onClick={() => {
+          void navigator.clipboard.writeText(value).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          });
+        }}
+      >
+        {copied ? "Copied!" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
+function AgentBridgeSection() {
+  const [binaryPath, setBinaryPath] = useState<string | null>(null);
+  useEffect(() => {
+    void invoke<string>("mcp_binary_path").then(setBinaryPath, () => setBinaryPath(""));
+  }, []);
+  if (binaryPath === null) return null;
+  const command = binaryPath || "lousa";
+  const mcpJson = JSON.stringify({ mcpServers: { lousa: { command, args: ["--mcp"] } } });
+  return (
+    <section className="settings-section">
+      <h3>Agent Bridge</h3>
+      <p className="settings-note-text">
+        Let an AI agent (Claude Code, Codex) read this Canvas and draw system designs onto it.
+        Register Lousa as an MCP server — Lousa must be open while the agent works, and every AI
+        change set can be reverted from the banner.
+      </p>
+      <CopyRow label="Claude Code" value={`claude mcp add lousa -- "${command}" --mcp`} />
+      <CopyRow label="JSON config" value={mcpJson} />
+    </section>
   );
 }
 
@@ -154,6 +200,8 @@ export function SettingsPanel({ theme, customTheme, onClose }: SettingsPanelProp
             />
           ))}
         </section>
+
+        <AgentBridgeSection />
 
         <section className="settings-section settings-note">
           <h3>Canvas colors</h3>
