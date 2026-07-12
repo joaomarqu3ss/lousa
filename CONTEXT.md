@@ -23,3 +23,11 @@ _Avoid_: widget, embed, output
 **Live State**:
 The re-editable parameters behind a Module Element (e.g. the equation and axis range behind a plotted graph), as opposed to its baked visual appearance.
 _Avoid_: metadata, source data
+
+**Agent Bridge**:
+The platform capability that exposes the live Canvas to an external AI agent over MCP, letting it read the Canvas and place or edit elements on it.
+_Avoid_: plugin, AI Module, assistant
+
+**Checkpoint**:
+The snapshot of the Canvas taken before an Agent Bridge turn's first write, restored atomically by "Revert AI changes".
+_Avoid_: backup, save point, undo
