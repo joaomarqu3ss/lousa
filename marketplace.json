@@ -1,0 +1,12 @@
+{
+  "name": "lousa",
+  "description": "Lousa — live whiteboard tools for AI agents",
+  "plugins": [
+    {
+      "name": "lousa",
+      "description": "Draw system-design diagrams on the live Lousa whiteboard from Claude Code",
+      "version": "0.1.0",
+      "source": "./claude-plugin"
+    }
+  ]
+}
