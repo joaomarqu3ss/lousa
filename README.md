@@ -57,6 +57,23 @@ the `lousa` binary must be on your PATH — the Linux packages install it to
 `/usr/bin`; on Windows add the install folder to PATH, or register the server
 manually as below).
 
+### Claude Desktop
+
+No plugin needed — register the MCP server in **Settings → Developer → Edit
+Config** (`claude_desktop_config.json`), using the binary path shown in Lousa
+under **Settings → Agent Bridge**:
+
+```json
+{
+  "mcpServers": {
+    "lousa": { "command": "C:\\Users\\you\\AppData\\Local\\Programs\\Lousa\\lousa.exe", "args": ["--mcp"] }
+  }
+}
+```
+
+Restart Claude Desktop with Lousa open and ask Claude to read or draw on your
+canvas — no slash command, plain conversation.
+
 ### Codex — or any MCP client
 
 Register the stdio server (path shown in Lousa under **Settings → Agent
