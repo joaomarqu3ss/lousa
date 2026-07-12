@@ -12,13 +12,33 @@ import { ask } from "@tauri-apps/plugin-dialog";
 import { pickOpenPath, pickSavePath, readDocument, saveDocument } from "./lib/document";
 import { exportScene } from "./lib/export";
 import { windowTitle } from "./lib/title";
+import { useTheme } from "./lib/useTheme";
+import { useCustomTheme } from "./lib/useCustomTheme";
+import { SettingsPanel } from "./components/SettingsPanel";
 import "@excalidraw/excalidraw/index.css";
 import "./App.css";
+
+const gearIcon = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    width="16"
+    height="16"
+  >
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
 
 function App() {
   const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const theme = useTheme();
+  const customTheme = useCustomTheme();
 
   // Scene version of the last saved (or freshly loaded/empty) state.
   const savedVersion = useRef(0);
@@ -96,7 +116,12 @@ function App() {
         null,
         null,
       );
-      api.updateScene({ elements: restored.elements, appState: restored.appState });
+      // Theme is an app-wide preference (ADR-0008), not a document property —
+      // keep the current one instead of adopting whatever the file was saved in.
+      api.updateScene({
+        elements: restored.elements,
+        appState: { ...restored.appState, theme: theme.resolved },
+      });
       api.addFiles(Object.values(restored.files ?? {}));
       api.history.clear();
       setFilePath(path);
@@ -104,7 +129,7 @@ function App() {
     } catch (err) {
       reportError("Open failed", err);
     }
-  }, [api, confirmDiscard, markClean, reportError]);
+  }, [api, confirmDiscard, markClean, reportError, theme.resolved]);
 
   const newDocument = useCallback(async () => {
     if (!api || !(await confirmDiscard())) return;
@@ -160,6 +185,10 @@ function App() {
         event.preventDefault();
         event.stopPropagation();
         void newDocument();
+      } else if (key === ",") {
+        event.preventDefault();
+        event.stopPropagation();
+        setSettingsOpen(true);
       }
     };
     window.addEventListener("keydown", onKeyDown, { capture: true });
@@ -170,6 +199,7 @@ function App() {
     <div className="canvas-root">
       <Excalidraw
         excalidrawAPI={setApi}
+        theme={theme.resolved}
         onChange={() => setDirty(currentVersion() !== savedVersion.current)}
       >
         <MainMenu>
@@ -197,9 +227,19 @@ function App() {
             <MainMenu.Item onSelect={() => void runExport("pdf")}>Export PDF…</MainMenu.Item>
           </MainMenu.Group>
           <MainMenu.Separator />
-          <MainMenu.DefaultItems.ToggleTheme />
+          <MainMenu.DefaultItems.ChangeCanvasBackground />
+          <MainMenu.Item icon={gearIcon} onSelect={() => setSettingsOpen(true)} shortcut="Ctrl+,">
+            Settings…
+          </MainMenu.Item>
         </MainMenu>
       </Excalidraw>
+      {settingsOpen && (
+        <SettingsPanel
+          theme={theme}
+          customTheme={customTheme}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
     </div>
   );
 }

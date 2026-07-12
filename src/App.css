@@ -10,3 +10,244 @@ body,
   height: 100vh;
   width: 100vw;
 }
+
+/*
+ * Lousa "chalk teal" accent palette.
+ *
+ * Excalidraw derives every selected/active/focus surface from a --color-primary
+ * family; we re-tint that whole family (matching Excalidraw's own light/dark
+ * value relationships) so the UI reads as colored chalk on slate instead of
+ * stock Excalidraw violet. Imported after Excalidraw's stylesheet, so these win
+ * at equal specificity by source order.
+ */
+.excalidraw {
+  --color-primary: #2f8f83;
+  --color-primary-darker: #2a7f74;
+  --color-primary-darkest: #226b62;
+  --color-primary-light: #dcecea;
+  --color-primary-light-darker: #cbe4e0;
+  --color-primary-hover: #2a7f74;
+  --color-brand-hover: #2a7f74;
+  --color-brand-active: #226b62;
+  --color-surface-primary-container: #d3e9e5;
+  --color-on-primary-container: #06342f;
+}
+
+.excalidraw.theme--dark {
+  --color-primary: #7fd4c6;
+  --color-primary-darker: #93dccf;
+  --color-primary-darkest: #a6e3d8;
+  --color-primary-light: #33514c;
+  --color-primary-light-darker: #2b4340;
+  --color-primary-hover: #93dccf;
+  --color-brand-hover: #93dccf;
+  --color-brand-active: #a6e3d8;
+  --color-surface-primary-container: #2f4d48;
+  --color-on-primary-container: #d8f0eb;
+}
+
+/*
+ * Settings dialog. Reuses Excalidraw's themed surface/text variables so it
+ * automatically tracks light/dark and any custom interface colors.
+ */
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.settings-dialog {
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 20px 22px 22px;
+  background: var(--island-bg-color, #fff);
+  color: var(--color-on-surface, #1b1b1f);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  font-family:
+    Assistant,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.settings-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+.settings-close:hover {
+  background: var(--color-surface-high, #f1f0ff);
+}
+
+.settings-section {
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border-outline-variant, #c5c5d0);
+}
+
+.settings-section h3 {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.settings-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.settings-reset {
+  border: none;
+  background: transparent;
+  color: var(--color-primary, #2f8f83);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+}
+
+.settings-reset:hover {
+  text-decoration: underline;
+}
+
+.settings-modes {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-modes label {
+  flex: 1;
+}
+
+.settings-modes input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.settings-modes span {
+  display: block;
+  text-align: center;
+  padding: 8px 0;
+  border: 1px solid var(--color-border-outline-variant, #c5c5d0);
+  border-radius: 8px;
+  background: var(--color-surface-low, #ececf4);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.settings-modes input:checked + span {
+  background: var(--color-primary, #2f8f83);
+  border-color: var(--color-primary, #2f8f83);
+  color: var(--color-surface-lowest, #fff);
+}
+
+.settings-modes input:focus-visible + span {
+  outline: 2px solid var(--color-primary, #2f8f83);
+  outline-offset: 2px;
+}
+
+.settings-color {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.settings-color__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.settings-color__label {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.settings-color__hint {
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+.settings-color__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.settings-color__controls input[type="color"] {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--color-border-outline-variant, #c5c5d0);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+}
+
+.settings-color__hex {
+  width: 84px;
+  padding: 6px 8px;
+  border: 1px solid var(--input-border-color, #ced4da);
+  border-radius: 8px;
+  background: var(--input-bg-color, #fff);
+  color: inherit;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.82rem;
+}
+
+.settings-color__default {
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 4px;
+}
+
+.settings-color__default:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.settings-note p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0.85;
+}
