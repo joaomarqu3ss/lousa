@@ -66,7 +66,10 @@ under **Settings → Agent Bridge**:
 ```json
 {
   "mcpServers": {
-    "lousa": { "command": "C:\\Users\\you\\AppData\\Local\\Programs\\Lousa\\lousa.exe", "args": ["--mcp"] }
+    "lousa": {
+      "command": "C:\\Users\\you\\AppData\\Local\\Programs\\Lousa\\lousa.exe",
+      "args": ["--mcp"]
+    }
   }
 }
 ```
