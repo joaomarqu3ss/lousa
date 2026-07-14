@@ -26,3 +26,5 @@ public/locales
 *.njsproj
 *.sln
 *.sw?
+/target
+/src-tauri/target
