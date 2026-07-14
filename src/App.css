@@ -341,7 +341,6 @@ body,
   opacity: 0.85;
 }
 
-
 /* ==========================================
    ✨ NOVAS REGRAS: ESTILIZAÇÃO DO MARKDOWN 
    ========================================== */
@@ -381,7 +380,8 @@ body,
   margin-bottom: 14px;
 }
 
-.markdown-preview ul, .markdown-preview ol {
+.markdown-preview ul,
+.markdown-preview ol {
   padding-left: 20px;
   margin-bottom: 14px;
 }
@@ -401,7 +401,14 @@ body,
 }
 
 .markdown-preview code {
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
   font-size: 13px;
   background-color: rgba(110, 118, 129, 0.15);
   padding: 2px 4px;

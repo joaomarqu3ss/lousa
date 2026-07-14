@@ -22,7 +22,14 @@ import "@excalidraw/excalidraw/index.css";
 import "./App.css";
 
 const gearIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    width="16"
+    height="16"
+  >
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
@@ -43,13 +50,16 @@ function App() {
   const [activeTab, setActiveTab] = useState<"quadro" | "notas">("quadro");
   const [notes, setNotes] = useState<Note[]>(() => {
     const saved = localStorage.getItem("lousa_notas");
-    return saved ? JSON.parse(saved) : [
-      { 
-        id: "1", 
-        title: "Explicação Arquitetura", 
-        content: "# Arquitetura do Sistema 🚀\n\nUse este espaço para explicar como os sistemas funcionam.\n\n## Componentes Principais:\n- **Frontend**: Desenvolvido em React e Vite.\n- **Backend**: Feito em Rust com Tauri para alto desempenho." 
-      }
-    ];
+    return saved
+      ? JSON.parse(saved)
+      : [
+          {
+            id: "1",
+            title: "Explicação Arquitetura",
+            content:
+              "# Arquitetura do Sistema 🚀\n\nUse este espaço para explicar como os sistemas funcionam.\n\n## Componentes Principais:\n- **Frontend**: Desenvolvido em React e Vite.\n- **Backend**: Feito em Rust com Tauri para alto desempenho.",
+          },
+        ];
   });
   const [selectedNoteId, setSelectedNoteId] = useState<string>("1");
 
@@ -216,27 +226,29 @@ function App() {
     localStorage.setItem("lousa_notas", JSON.stringify(notes));
   }, [notes]);
 
-  const selectedNote = notes.find(n => n.id === selectedNoteId);
+  const selectedNote = notes.find((n) => n.id === selectedNoteId);
 
   const createNewNote = () => {
     const newNote: Note = {
       id: Date.now().toString(),
       title: "Nova Nota " + (notes.length + 1),
-      content: "# Nova Nota\nComece a editar em Markdown!"
+      content: "# Nova Nota\nComece a editar em Markdown!",
     };
     setNotes([...notes, newNote]);
     setSelectedNoteId(newNote.id);
   };
 
   const updateNoteContent = (newContent: string) => {
-    setNotes(notes.map(note => {
-      if (note.id === selectedNoteId) {
-        const firstLine = newContent.trim().split("\n")[0] || "";
-        const cleanTitle = firstLine.replace(/[#*`]/g, "").trim() || "Nota sem título";
-        return { ...note, content: newContent, title: cleanTitle };
-      }
-      return note;
-    }));
+    setNotes(
+      notes.map((note) => {
+        if (note.id === selectedNoteId) {
+          const firstLine = newContent.trim().split("\n")[0] || "";
+          const cleanTitle = firstLine.replace(/[#*`]/g, "").trim() || "Nota sem título";
+          return { ...note, content: newContent, title: cleanTitle };
+        }
+        return note;
+      }),
+    );
   };
 
   const exportarNotaComoArquivo = async () => {
@@ -258,38 +270,43 @@ function App() {
   const borderColor = isDark ? "#2d2d34" : "#e4e4e7";
 
   return (
-    <div className="canvas-root" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <div style={{ 
-        display: "flex", 
-        gap: "10px", 
-        padding: "10px", 
-        backgroundColor: isDark ? "#1e1e24" : "#e4e4e7", 
-        borderBottom: `1px solid ${isDark ? "#2d2d34" : "#d4d4d8"}` 
-      }}>
-        <button 
+    <div
+      className="canvas-root"
+      style={{ display: "flex", flexDirection: "column", height: "100vh" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          padding: "10px",
+          backgroundColor: isDark ? "#1e1e24" : "#e4e4e7",
+          borderBottom: `1px solid ${isDark ? "#2d2d34" : "#d4d4d8"}`,
+        }}
+      >
+        <button
           onClick={() => setActiveTab("quadro")}
-          style={{ 
-            padding: "8px 16px", 
-            background: activeTab === "quadro" ? (isDark ? "#3f3f46" : "#cbd5e1") : "transparent", 
-            color: isDark ? "#fff" : "#000", 
-            border: `1px solid ${isDark ? "#52525b" : "#cbd5e1"}`, 
-            borderRadius: "6px", 
+          style={{
+            padding: "8px 16px",
+            background: activeTab === "quadro" ? (isDark ? "#3f3f46" : "#cbd5e1") : "transparent",
+            color: isDark ? "#fff" : "#000",
+            border: `1px solid ${isDark ? "#52525b" : "#cbd5e1"}`,
+            borderRadius: "6px",
             cursor: "pointer",
-            fontWeight: "bold"
+            fontWeight: "bold",
           }}
         >
           🎨 Quadro
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab("notas")}
-          style={{ 
-            padding: "8px 16px", 
-            background: activeTab === "notas" ? (isDark ? "#3f3f46" : "#cbd5e1") : "transparent", 
-            color: isDark ? "#fff" : "#000", 
-            border: `1px solid ${isDark ? "#52525b" : "#cbd5e1"}`, 
-            borderRadius: "6px", 
+          style={{
+            padding: "8px 16px",
+            background: activeTab === "notas" ? (isDark ? "#3f3f46" : "#cbd5e1") : "transparent",
+            color: isDark ? "#fff" : "#000",
+            border: `1px solid ${isDark ? "#52525b" : "#cbd5e1"}`,
+            borderRadius: "6px",
             cursor: "pointer",
-            fontWeight: "bold"
+            fontWeight: "bold",
           }}
         >
           📝 Notas Markdown
@@ -304,52 +321,118 @@ function App() {
             onChange={() => setDirty(currentVersion() !== savedVersion.current)}
           >
             <MainMenu>
-              <MainMenu.Item onSelect={() => void newDocument()} shortcut="Ctrl+N">New</MainMenu.Item>
-              <MainMenu.Item onSelect={() => void openDocument()} shortcut="Ctrl+O">Open…</MainMenu.Item>
-              <MainMenu.Item onSelect={() => void save()} shortcut="Ctrl+S">Save</MainMenu.Item>
-              <MainMenu.Item onSelect={() => void saveAs()} shortcut="Ctrl+Shift+S">Save As…</MainMenu.Item>
+              <MainMenu.Item onSelect={() => void newDocument()} shortcut="Ctrl+N">
+                New
+              </MainMenu.Item>
+              <MainMenu.Item onSelect={() => void openDocument()} shortcut="Ctrl+O">
+                Open…
+              </MainMenu.Item>
+              <MainMenu.Item onSelect={() => void save()} shortcut="Ctrl+S">
+                Save
+              </MainMenu.Item>
+              <MainMenu.Item onSelect={() => void saveAs()} shortcut="Ctrl+Shift+S">
+                Save As…
+              </MainMenu.Item>
               <MainMenu.Separator />
               <MainMenu.Group title="Export">
                 <MainMenu.Item onSelect={() => void runExport("svg")}>Export SVG…</MainMenu.Item>
-                <MainMenu.Item onSelect={() => void runExport("png")}>Export PNG (high-res)…</MainMenu.Item>
-                <MainMenu.Item onSelect={() => void runExport("jpeg")}>Export JPEG (high-res)…</MainMenu.Item>
+                <MainMenu.Item onSelect={() => void runExport("png")}>
+                  Export PNG (high-res)…
+                </MainMenu.Item>
+                <MainMenu.Item onSelect={() => void runExport("jpeg")}>
+                  Export JPEG (high-res)…
+                </MainMenu.Item>
                 <MainMenu.Item onSelect={() => void runExport("pdf")}>Export PDF…</MainMenu.Item>
               </MainMenu.Group>
               <MainMenu.Separator />
               <MainMenu.DefaultItems.ChangeCanvasBackground />
-              <MainMenu.Item icon={gearIcon} onSelect={() => setSettingsOpen(true)} shortcut="Ctrl+,">Settings…</MainMenu.Item>
+              <MainMenu.Item
+                icon={gearIcon}
+                onSelect={() => setSettingsOpen(true)}
+                shortcut="Ctrl+,"
+              >
+                Settings…
+              </MainMenu.Item>
             </MainMenu>
           </Excalidraw>
         ) : (
-          <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: bgColor, color: textColor }}>
-            <div style={{ width: "230px", backgroundColor: sidebarColor, borderRight: `1px solid ${borderColor}`, display: "flex", flexDirection: "column", padding: "10px" }}>
-              <button 
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              height: "100%",
+              backgroundColor: bgColor,
+              color: textColor,
+            }}
+          >
+            <div
+              style={{
+                width: "230px",
+                backgroundColor: sidebarColor,
+                borderRight: `1px solid ${borderColor}`,
+                display: "flex",
+                flexDirection: "column",
+                padding: "10px",
+              }}
+            >
+              <button
                 onClick={createNewNote}
-                style={{ padding: "10px", backgroundColor: "#6366f1", color: "#ffffff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", marginBottom: "10px" }}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#6366f1",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  marginBottom: "10px",
+                }}
               >
                 ➕ Nova Nota
               </button>
 
-              <button 
+              <button
                 onClick={exportarNotaComoArquivo}
-                style={{ padding: "10px", backgroundColor: "#10b981", color: "#ffffff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", marginBottom: "15px" }}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#10b981",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  marginBottom: "15px",
+                }}
               >
                 💾 Salvar Arquivo .md
               </button>
 
-              <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "5px" }}>
-                {notes.map(note => (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                }}
+              >
+                {notes.map((note) => (
                   <div
                     key={note.id}
                     onClick={() => setSelectedNoteId(note.id)}
                     style={{
                       padding: "10px",
                       borderRadius: "4px",
-                      backgroundColor: note.id === selectedNoteId ? (isDark ? "#2d2d34" : "#e4e4e7") : "transparent",
+                      backgroundColor:
+                        note.id === selectedNoteId
+                          ? isDark
+                            ? "#2d2d34"
+                            : "#e4e4e7"
+                          : "transparent",
                       cursor: "pointer",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
-                      textOverflow: "ellipsis"
+                      textOverflow: "ellipsis",
                     }}
                   >
                     📄 {note.title}
@@ -373,23 +456,34 @@ function App() {
                     fontFamily: "monospace",
                     fontSize: "14px",
                     resize: "none",
-                    outline: "none"
+                    outline: "none",
                   }}
                 />
 
-                <div style={{
-                  flex: 1,
-                  backgroundColor: isDark ? "#1a1a1e" : "#ffffff",
-                  border: `1px solid ${borderColor}`,
-                  borderRadius: "8px",
-                  padding: "15px",
-                  overflowY: "auto"
-                }}>
+                <div
+                  style={{
+                    flex: 1,
+                    backgroundColor: isDark ? "#1a1a1e" : "#ffffff",
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: "8px",
+                    padding: "15px",
+                    overflowY: "auto",
+                  }}
+                >
                   <ReactMarkdown>{selectedNote.content}</ReactMarkdown>
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", flex: 1, color: "#888" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                  flex: 1,
+                  color: "#888",
+                }}
+              >
                 Selecione ou crie uma nota para começar.
               </div>
             )}
@@ -407,8 +501,12 @@ function App() {
       {bridge.revertAvailable && (
         <div className="agent-banner" role="status">
           <span>AI changed the Canvas</span>
-          <button type="button" onClick={bridge.revert}>Revert AI changes</button>
-          <button type="button" className="agent-banner-keep" onClick={bridge.keep}>Keep</button>
+          <button type="button" onClick={bridge.revert}>
+            Revert AI changes
+          </button>
+          <button type="button" className="agent-banner-keep" onClick={bridge.keep}>
+            Keep
+          </button>
         </div>
       )}
     </div>
