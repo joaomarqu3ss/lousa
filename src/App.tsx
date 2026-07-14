@@ -41,7 +41,6 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<"quadro" | "notas">("quadro");
   const [notes, setNotes] = useState<Note[]>(() => {
-    // Tenta carregar as notas do LocalStorage ao abrir o app para não sumirem
     const saved = localStorage.getItem("lousa_notas");
     return saved ? JSON.parse(saved) : [
       { 
@@ -113,6 +112,16 @@ function App() {
     [filePath, writeScene, saveAs],
   );
 
+  // 1. Declaramos o confirmDiscard primeiro
+  const confirmDiscard = useCallback(async () => {
+    if (!dirtyRef.current) return true;
+    return await ask("There are unsaved changes. Discard them?", {
+      title: "Lousa",
+      kind: "warning",
+    });
+  }, []);
+
+  // 2. Agora o openDocument (com confirmDiscard mapeado e dependência adicionada)
   const openDocument = useCallback(async () => {
     if (!api || !(await confirmDiscard())) return;
     const path = await pickOpenPath();
@@ -136,18 +145,9 @@ function App() {
     } catch (err) {
       reportError("Open failed", err);
     }
-  }, [api, markClean, reportError, theme.resolved, dropCheckpoint]);
+  }, [api, markClean, reportError, theme.resolved, dropCheckpoint, confirmDiscard]);
 
- // 1. Declaramos o confirmDiscard primeiro
-  const confirmDiscard = useCallback(async () => {
-    if (!dirtyRef.current) return true;
-    return await ask("There are unsaved changes. Discard them?", {
-      title: "Lousa",
-      kind: "warning",
-    });
-  }, []);
-
-  // 2. Depois o newDocument (agora ele enxerga o confirmDiscard e o tem no array de dependências)
+  // 3. E o newDocument (com confirmDiscard mapeado e dependência adicionada)
   const newDocument = useCallback(async () => {
     if (!api || !(await confirmDiscard())) return;
     api.resetScene();
@@ -156,7 +156,7 @@ function App() {
     dropCheckpoint();
   }, [api, markClean, dropCheckpoint, confirmDiscard]);
 
-  // 3. E o runExport continua aqui embaixo normalmente
+  // 4. E o runExport segue normalmente abaixo deles
   const runExport = useCallback(
     async (format: "svg" | "png" | "jpeg" | "pdf") => {
       if (!api) return;
@@ -211,7 +211,6 @@ function App() {
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
   }, [save, saveAs, openDocument, newDocument]);
 
-  // Salva a lista de notas no LocalStorage sempre que houver alteração
   useEffect(() => {
     localStorage.setItem("lousa_notas", JSON.stringify(notes));
   }, [notes]);
@@ -239,7 +238,6 @@ function App() {
     }));
   };
 
-  // 💾 Função que usa o utilitário do João para exportar a nota ativa como arquivo .md de verdade
   const exportarNotaComoArquivo = async () => {
     if (!selectedNote) return;
     const path = await pickSavePath(selectedNote.title.toLowerCase().replace(/\s+/g, "_") + ".md");
@@ -260,8 +258,6 @@ function App() {
 
   return (
     <div className="canvas-root" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      
-      {/* Barra de Navegação Superior */}
       <div style={{ 
         display: "flex", 
         gap: "10px", 
@@ -299,7 +295,6 @@ function App() {
         </button>
       </div>
 
-      {/* Conteúdo Dinâmico */}
       <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
         {activeTab === "quadro" ? (
           <Excalidraw
@@ -325,10 +320,7 @@ function App() {
             </MainMenu>
           </Excalidraw>
         ) : (
-          /* TELA DE NOTAS COM EXTENSÃO DE SALVAMENTO */
           <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: bgColor, color: textColor }}>
-            
-            {/* Lateral: Lista de Notas */}
             <div style={{ width: "230px", backgroundColor: sidebarColor, borderRight: `1px solid ${borderColor}`, display: "flex", flexDirection: "column", padding: "10px" }}>
               <button 
                 onClick={createNewNote}
@@ -365,7 +357,6 @@ function App() {
               </div>
             </div>
 
-            {/* Principal: Editor e Preview */}
             {selectedNote ? (
               <div style={{ flex: 1, display: "flex", gap: "15px", padding: "15px" }}>
                 <textarea
