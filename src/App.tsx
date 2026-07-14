@@ -138,14 +138,7 @@ function App() {
     }
   }, [api, markClean, reportError, theme.resolved, dropCheckpoint]);
 
-  const newDocument = useCallback(async () => {
-    if (!api || !(await confirmDiscard())) return;
-    api.resetScene();
-    setFilePath(null);
-    markClean();
-    dropCheckpoint();
-  }, [api, markClean, dropCheckpoint]);
-
+ // 1. Declaramos o confirmDiscard primeiro
   const confirmDiscard = useCallback(async () => {
     if (!dirtyRef.current) return true;
     return await ask("There are unsaved changes. Discard them?", {
@@ -154,6 +147,16 @@ function App() {
     });
   }, []);
 
+  // 2. Depois o newDocument (agora ele enxerga o confirmDiscard e o tem no array de dependências)
+  const newDocument = useCallback(async () => {
+    if (!api || !(await confirmDiscard())) return;
+    api.resetScene();
+    setFilePath(null);
+    markClean();
+    dropCheckpoint();
+  }, [api, markClean, dropCheckpoint, confirmDiscard]);
+
+  // 3. E o runExport continua aqui embaixo normalmente
   const runExport = useCallback(
     async (format: "svg" | "png" | "jpeg" | "pdf") => {
       if (!api) return;
