@@ -16,6 +16,7 @@ import { useTheme } from "./lib/useTheme";
 import { useCustomTheme } from "./lib/useCustomTheme";
 import { useAgentBridge } from "./lib/agentBridge/useAgentBridge";
 import { SettingsPanel } from "./components/SettingsPanel";
+import ReactMarkdown from "react-markdown";
 import "@excalidraw/excalidraw/index.css";
 import "./App.css";
 
@@ -33,20 +34,40 @@ const gearIcon = (
   </svg>
 );
 
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+}
+
 function App() {
   const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<"quadro" | "notas">("quadro");
+  const [notes, setNotes] = useState<Note[]>(() => {
+    const saved = localStorage.getItem("lousa_notas");
+    return saved
+      ? JSON.parse(saved)
+      : [
+          {
+            id: "1",
+            title: "Explicação Arquitetura",
+            content:
+              "# Arquitetura do Sistema 🚀\n\nUse este espaço para explicar como os sistemas funcionam.\n\n## Componentes Principais:\n- **Frontend**: Desenvolvido em React e Vite.\n- **Backend**: Feito em Rust com Tauri para alto desempenho.",
+          },
+        ];
+  });
+  const [selectedNoteId, setSelectedNoteId] = useState<string>("1");
+
   const theme = useTheme();
   const customTheme = useCustomTheme();
   const bridge = useAgentBridge(api);
-  // Stable identity (useCallback in the hook) — safe as an effect dependency.
   const dropCheckpoint = bridge.keep;
 
-  // Scene version of the last saved (or freshly loaded/empty) state.
   const savedVersion = useRef(0);
-  // Close-guard listener must see the current dirty flag without re-subscribing.
   const dirtyRef = useRef(dirty);
   dirtyRef.current = dirty;
 
@@ -66,14 +87,6 @@ function App() {
     },
     [api],
   );
-
-  const confirmDiscard = useCallback(async () => {
-    if (!dirtyRef.current) return true;
-    return await ask("There are unsaved changes. Discard them?", {
-      title: "Lousa",
-      kind: "warning",
-    });
-  }, []);
 
   const writeScene = useCallback(
     async (path: string) => {
@@ -109,6 +122,16 @@ function App() {
     [filePath, writeScene, saveAs],
   );
 
+  // 1. Declaramos o confirmDiscard primeiro
+  const confirmDiscard = useCallback(async () => {
+    if (!dirtyRef.current) return true;
+    return await ask("There are unsaved changes. Discard them?", {
+      title: "Lousa",
+      kind: "warning",
+    });
+  }, []);
+
+  // 2. Agora o openDocument (com confirmDiscard mapeado e dependência adicionada)
   const openDocument = useCallback(async () => {
     if (!api || !(await confirmDiscard())) return;
     const path = await pickOpenPath();
@@ -120,8 +143,6 @@ function App() {
         null,
         null,
       );
-      // Theme is an app-wide preference (ADR-0008), not a document property —
-      // keep the current one instead of adopting whatever the file was saved in.
       api.updateScene({
         elements: restored.elements,
         appState: { ...restored.appState, theme: theme.resolved },
@@ -130,22 +151,22 @@ function App() {
       api.history.clear();
       setFilePath(path);
       markClean();
-      // A checkpoint belongs to the Canvas it snapshotted — never let Revert
-      // inject a previous Document's elements into this one.
       dropCheckpoint();
     } catch (err) {
       reportError("Open failed", err);
     }
-  }, [api, confirmDiscard, markClean, reportError, theme.resolved, dropCheckpoint]);
+  }, [api, markClean, reportError, theme.resolved, dropCheckpoint, confirmDiscard]);
 
+  // 3. E o newDocument (com confirmDiscard mapeado e dependência adicionada)
   const newDocument = useCallback(async () => {
     if (!api || !(await confirmDiscard())) return;
     api.resetScene();
     setFilePath(null);
     markClean();
-    dropCheckpoint(); // same reason as openDocument
-  }, [api, confirmDiscard, markClean, dropCheckpoint]);
+    dropCheckpoint();
+  }, [api, markClean, dropCheckpoint, confirmDiscard]);
 
+  // 4. E o runExport segue normalmente abaixo deles
   const runExport = useCallback(
     async (format: "svg" | "png" | "jpeg" | "pdf") => {
       if (!api) return;
@@ -161,12 +182,10 @@ function App() {
     [api, reportError],
   );
 
-  // Native window title reflects the document and its dirty state.
   useEffect(() => {
     void getCurrentWindow().setTitle(windowTitle(filePath, dirty));
   }, [filePath, dirty]);
 
-  // Guard the native close button against unsaved changes.
   useEffect(() => {
     const unlisten = getCurrentWindow().onCloseRequested(async (event) => {
       if (dirtyRef.current && !(await confirmDiscard())) event.preventDefault();
@@ -176,7 +195,6 @@ function App() {
     };
   }, [confirmDiscard]);
 
-  // File shortcuts, capture-phase so they win over Excalidraw's own bindings.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey)) return;
@@ -203,44 +221,275 @@ function App() {
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
   }, [save, saveAs, openDocument, newDocument]);
 
+  useEffect(() => {
+    localStorage.setItem("lousa_notas", JSON.stringify(notes));
+  }, [notes]);
+
+  const selectedNote = notes.find((n) => n.id === selectedNoteId);
+
+  const createNewNote = () => {
+    const newNote: Note = {
+      id: Date.now().toString(),
+      title: "Nova Nota " + (notes.length + 1),
+      content: "# Nova Nota\nComece a editar em Markdown!",
+    };
+    setNotes([...notes, newNote]);
+    setSelectedNoteId(newNote.id);
+  };
+
+  const updateNoteContent = (newContent: string) => {
+    setNotes(
+      notes.map((note) => {
+        if (note.id === selectedNoteId) {
+          const firstLine = newContent.trim().split("\n")[0] || "";
+          const cleanTitle = firstLine.replace(/[#*`]/g, "").trim() || "Nota sem título";
+          return { ...note, content: newContent, title: cleanTitle };
+        }
+        return note;
+      }),
+    );
+  };
+
+  const exportarNotaComoArquivo = async () => {
+    if (!selectedNote) return;
+    const path = await pickSavePath(selectedNote.title.toLowerCase().replace(/\s+/g, "_") + ".md");
+    if (!path) return;
+    try {
+      await saveDocument(path, selectedNote.content);
+      api?.setToast({ message: "Nota exportada com sucesso!", duration: 3000 });
+    } catch (err) {
+      reportError("Erro ao exportar nota", err);
+    }
+  };
+
+  const isDark = theme.resolved === "dark";
+  const bgColor = isDark ? "#121214" : "#ffffff";
+  const sidebarColor = isDark ? "#1a1a1e" : "#f4f4f5";
+  const textColor = isDark ? "#ffffff" : "#000000";
+  const borderColor = isDark ? "#2d2d34" : "#e4e4e7";
+
   return (
-    <div className="canvas-root">
-      <Excalidraw
-        excalidrawAPI={setApi}
-        theme={theme.resolved}
-        onChange={() => setDirty(currentVersion() !== savedVersion.current)}
+    <div
+      className="canvas-root"
+      style={{ display: "flex", flexDirection: "column", height: "100vh" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          padding: "10px",
+          backgroundColor: isDark ? "#1e1e24" : "#e4e4e7",
+          borderBottom: `1px solid ${isDark ? "#2d2d34" : "#d4d4d8"}`,
+        }}
       >
-        <MainMenu>
-          <MainMenu.Item onSelect={() => void newDocument()} shortcut="Ctrl+N">
-            New
-          </MainMenu.Item>
-          <MainMenu.Item onSelect={() => void openDocument()} shortcut="Ctrl+O">
-            Open…
-          </MainMenu.Item>
-          <MainMenu.Item onSelect={() => void save()} shortcut="Ctrl+S">
-            Save
-          </MainMenu.Item>
-          <MainMenu.Item onSelect={() => void saveAs()} shortcut="Ctrl+Shift+S">
-            Save As…
-          </MainMenu.Item>
-          <MainMenu.Separator />
-          <MainMenu.Group title="Export">
-            <MainMenu.Item onSelect={() => void runExport("svg")}>Export SVG…</MainMenu.Item>
-            <MainMenu.Item onSelect={() => void runExport("png")}>
-              Export PNG (high-res)…
-            </MainMenu.Item>
-            <MainMenu.Item onSelect={() => void runExport("jpeg")}>
-              Export JPEG (high-res)…
-            </MainMenu.Item>
-            <MainMenu.Item onSelect={() => void runExport("pdf")}>Export PDF…</MainMenu.Item>
-          </MainMenu.Group>
-          <MainMenu.Separator />
-          <MainMenu.DefaultItems.ChangeCanvasBackground />
-          <MainMenu.Item icon={gearIcon} onSelect={() => setSettingsOpen(true)} shortcut="Ctrl+,">
-            Settings…
-          </MainMenu.Item>
-        </MainMenu>
-      </Excalidraw>
+        <button
+          onClick={() => setActiveTab("quadro")}
+          style={{
+            padding: "8px 16px",
+            background: activeTab === "quadro" ? (isDark ? "#3f3f46" : "#cbd5e1") : "transparent",
+            color: isDark ? "#fff" : "#000",
+            border: `1px solid ${isDark ? "#52525b" : "#cbd5e1"}`,
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          🎨 Quadro
+        </button>
+        <button
+          onClick={() => setActiveTab("notas")}
+          style={{
+            padding: "8px 16px",
+            background: activeTab === "notas" ? (isDark ? "#3f3f46" : "#cbd5e1") : "transparent",
+            color: isDark ? "#fff" : "#000",
+            border: `1px solid ${isDark ? "#52525b" : "#cbd5e1"}`,
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          📝 Notas Markdown
+        </button>
+      </div>
+
+      <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+        {activeTab === "quadro" ? (
+          <Excalidraw
+            excalidrawAPI={setApi}
+            theme={theme.resolved}
+            onChange={() => setDirty(currentVersion() !== savedVersion.current)}
+          >
+            <MainMenu>
+              <MainMenu.Item onSelect={() => void newDocument()} shortcut="Ctrl+N">
+                New
+              </MainMenu.Item>
+              <MainMenu.Item onSelect={() => void openDocument()} shortcut="Ctrl+O">
+                Open…
+              </MainMenu.Item>
+              <MainMenu.Item onSelect={() => void save()} shortcut="Ctrl+S">
+                Save
+              </MainMenu.Item>
+              <MainMenu.Item onSelect={() => void saveAs()} shortcut="Ctrl+Shift+S">
+                Save As…
+              </MainMenu.Item>
+              <MainMenu.Separator />
+              <MainMenu.Group title="Export">
+                <MainMenu.Item onSelect={() => void runExport("svg")}>Export SVG…</MainMenu.Item>
+                <MainMenu.Item onSelect={() => void runExport("png")}>
+                  Export PNG (high-res)…
+                </MainMenu.Item>
+                <MainMenu.Item onSelect={() => void runExport("jpeg")}>
+                  Export JPEG (high-res)…
+                </MainMenu.Item>
+                <MainMenu.Item onSelect={() => void runExport("pdf")}>Export PDF…</MainMenu.Item>
+              </MainMenu.Group>
+              <MainMenu.Separator />
+              <MainMenu.DefaultItems.ChangeCanvasBackground />
+              <MainMenu.Item
+                icon={gearIcon}
+                onSelect={() => setSettingsOpen(true)}
+                shortcut="Ctrl+,"
+              >
+                Settings…
+              </MainMenu.Item>
+            </MainMenu>
+          </Excalidraw>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              height: "100%",
+              backgroundColor: bgColor,
+              color: textColor,
+            }}
+          >
+            <div
+              style={{
+                width: "230px",
+                backgroundColor: sidebarColor,
+                borderRight: `1px solid ${borderColor}`,
+                display: "flex",
+                flexDirection: "column",
+                padding: "10px",
+              }}
+            >
+              <button
+                onClick={createNewNote}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#6366f1",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  marginBottom: "10px",
+                }}
+              >
+                ➕ Nova Nota
+              </button>
+
+              <button
+                onClick={exportarNotaComoArquivo}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#10b981",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  marginBottom: "15px",
+                }}
+              >
+                💾 Salvar Arquivo .md
+              </button>
+
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                }}
+              >
+                {notes.map((note) => (
+                  <div
+                    key={note.id}
+                    onClick={() => setSelectedNoteId(note.id)}
+                    style={{
+                      padding: "10px",
+                      borderRadius: "4px",
+                      backgroundColor:
+                        note.id === selectedNoteId
+                          ? isDark
+                            ? "#2d2d34"
+                            : "#e4e4e7"
+                          : "transparent",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    📄 {note.title}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {selectedNote ? (
+              <div style={{ flex: 1, display: "flex", gap: "15px", padding: "15px" }}>
+                <textarea
+                  value={selectedNote.content}
+                  onChange={(e) => updateNoteContent(e.target.value)}
+                  style={{
+                    flex: 1,
+                    backgroundColor: isDark ? "#1a1a1e" : "#f9fafb",
+                    color: textColor,
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: "8px",
+                    padding: "15px",
+                    fontFamily: "monospace",
+                    fontSize: "14px",
+                    resize: "none",
+                    outline: "none",
+                  }}
+                />
+
+                <div
+                  style={{
+                    flex: 1,
+                    backgroundColor: isDark ? "#1a1a1e" : "#ffffff",
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: "8px",
+                    padding: "15px",
+                    overflowY: "auto",
+                  }}
+                >
+                  <ReactMarkdown>{selectedNote.content}</ReactMarkdown>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                  flex: 1,
+                  color: "#888",
+                }}
+              >
+                Selecione ou crie uma nota para começar.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {settingsOpen && (
         <SettingsPanel
           theme={theme}
