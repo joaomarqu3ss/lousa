@@ -28,6 +28,18 @@ body,
   overflow: hidden;
 }
 
+/* While the sidebar slides, the canvas bitmap lags a frame behind its growing
+   container; match Excalidraw's canvas background so the exposed strip is
+   invisible (dark mode renders the white canvas as ~#121212 via Excalidraw's
+   invert filter). */
+.theme-light .workspace-content {
+  background: #ffffff;
+}
+
+.theme-dark .workspace-content {
+  background: #121212;
+}
+
 /* The Canvas stays mounted for the app's lifetime — it is hidden, not
    destroyed, when a Note tab is active. Unmounting it would drop the scene. */
 .workspace-canvas,

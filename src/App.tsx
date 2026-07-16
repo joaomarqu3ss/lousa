@@ -393,13 +393,19 @@ function App() {
     void getCurrentWindow().setTitle(windowTitle(path, isDirty));
   }, [isCanvasActive, filePath, activeKey, dirty, activeNote]);
 
-  // Excalidraw is display:none while a Note tab is active; nudge it to
-  // re-measure its container the moment the Canvas tab is shown again.
+  // Excalidraw only re-measures on window resize, but its container changes
+  // size without one: when the Canvas tab is re-shown after display:none, and
+  // on every frame of the sidebar's 0.25s slide (otherwise the newly exposed
+  // strip stays unpainted). Nudge it each frame until the slide has settled.
   useEffect(() => {
     if (!isCanvasActive) return;
-    const id = requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    const start = performance.now();
+    let id = requestAnimationFrame(function tick(now: number) {
+      window.dispatchEvent(new Event("resize"));
+      if (now - start < 350) id = requestAnimationFrame(tick);
+    });
     return () => cancelAnimationFrame(id);
-  }, [isCanvasActive]);
+  }, [isCanvasActive, sidebarCollapsed]);
 
   // Guard the native close button against unsaved changes in ANY tab.
   useEffect(() => {
