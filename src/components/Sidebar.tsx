@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import {
+  IoAddOutline,
+  IoChevronBackOutline,
+  IoChevronForwardOutline,
+  IoColorPaletteOutline,
+  IoDocumentTextOutline,
+  IoFolderOpenOutline,
+  IoFolderOutline,
+  IoPencilOutline,
+  IoTrashOutline,
+} from "react-icons/io5";
 import { readWorkspaceDir, type Entry, type EntryKind } from "../lib/workspace";
 import "./workspace.css";
 
@@ -16,10 +27,10 @@ export interface SidebarProps {
   onDelete: (entry: Entry) => void;
 }
 
-const KIND_ICON: Record<EntryKind, string> = {
-  dir: "📁",
-  note: "📝",
-  document: "🎨",
+const KIND_ICON: Record<EntryKind, ReactNode> = {
+  dir: <IoFolderOutline />,
+  note: <IoDocumentTextOutline />,
+  document: <IoColorPaletteOutline />,
 };
 
 /** A directory we cannot read simply lists as empty rather than breaking the
@@ -169,7 +180,7 @@ export function Sidebar({
                   title="New note here"
                   onClick={() => onNewNote(entry.path)}
                 >
-                  ＋
+                  <IoAddOutline />
                 </button>
               ) : (
                 <>
@@ -180,7 +191,7 @@ export function Sidebar({
                     title="Rename"
                     onClick={() => onRename(entry)}
                   >
-                    ✎
+                    <IoPencilOutline />
                   </button>
                   <button
                     type="button"
@@ -189,7 +200,7 @@ export function Sidebar({
                     title="Delete"
                     onClick={() => onDelete(entry)}
                   >
-                    🗑
+                    <IoTrashOutline />
                   </button>
                 </>
               )}
@@ -203,60 +214,65 @@ export function Sidebar({
     });
   }
 
-  if (collapsed) {
-    return (
-      <aside className="workspace-sidebar workspace-sidebar--collapsed">
-        <button
-          type="button"
-          className="workspace-sidebar__expand"
-          aria-label="Expand sidebar"
-          title="Expand sidebar"
-          onClick={onToggleCollapsed}
-        >
-          »
-        </button>
-      </aside>
-    );
-  }
-
+  // One <aside> for both states so collapsing animates: the width transition
+  // clips the fixed-width body (a slide, not a squish) while the expand
+  // affordance cross-fades in. CSS keeps the hidden side unfocusable.
   return (
-    <aside className="workspace-sidebar">
-      <div className="workspace-sidebar__header">
-        <span className="workspace-sidebar__title">Workspace</span>
-        <div className="workspace-sidebar__actions">
-          <button type="button" aria-label="Open folder" title="Open folder" onClick={onOpenFolder}>
-            📂
-          </button>
-          <button
-            type="button"
-            aria-label="New note"
-            title="New note"
-            disabled={root === null}
-            onClick={() => root !== null && onNewNote(root)}
-          >
-            ＋
-          </button>
-          <button
-            type="button"
-            aria-label="Collapse sidebar"
-            title="Collapse sidebar"
-            onClick={onToggleCollapsed}
-          >
-            «
-          </button>
-        </div>
-      </div>
+    <aside className={"workspace-sidebar" + (collapsed ? " workspace-sidebar--collapsed" : "")}>
+      <button
+        type="button"
+        className="workspace-sidebar__expand"
+        aria-label="Expand sidebar"
+        title="Expand sidebar"
+        onClick={onToggleCollapsed}
+      >
+        <IoChevronForwardOutline />
+      </button>
 
-      {root === null ? (
-        <div className="workspace-empty">
-          <p className="workspace-empty__text">No folder open</p>
-          <button type="button" className="workspace-empty__button" onClick={onOpenFolder}>
-            Open folder
-          </button>
+      <div className="workspace-sidebar__body">
+        <div className="workspace-sidebar__header">
+          <span className="workspace-sidebar__title">Workspace</span>
+          <div className="workspace-sidebar__actions">
+            <button
+              type="button"
+              aria-label="Open folder"
+              title="Open folder"
+              onClick={onOpenFolder}
+            >
+              <IoFolderOpenOutline />
+            </button>
+            <button
+              type="button"
+              aria-label="New note"
+              title="New note"
+              disabled={root === null}
+              onClick={() => root !== null && onNewNote(root)}
+            >
+              <IoAddOutline />
+            </button>
+            <button
+              type="button"
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              onClick={onToggleCollapsed}
+            >
+              <IoChevronBackOutline />
+            </button>
+          </div>
         </div>
-      ) : (
-        <ul className="workspace-tree">{renderDir(root, 0)}</ul>
-      )}
+
+        {root === null ? (
+          <div className="workspace-empty">
+            <p className="workspace-empty__text">No folder open</p>
+            <button type="button" className="workspace-empty__button" onClick={onOpenFolder}>
+              <IoFolderOpenOutline />
+              Open folder
+            </button>
+          </div>
+        ) : (
+          <ul className="workspace-tree">{renderDir(root, 0)}</ul>
+        )}
+      </div>
     </aside>
   );
 }

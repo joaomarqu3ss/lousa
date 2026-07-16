@@ -8,10 +8,11 @@
 /* ---- Sidebar ------------------------------------------------------------ */
 
 .workspace-sidebar {
+  position: relative;
   display: flex;
+  flex: none;
   flex-direction: column;
   width: 240px;
-  min-width: 240px;
   height: 100%;
   overflow: hidden;
   border-right: 1px solid transparent;
@@ -25,22 +26,73 @@
     sans-serif;
   font-size: 13px;
   user-select: none;
+  transition: width 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .workspace-sidebar--collapsed {
   width: 32px;
-  min-width: 32px;
-  align-items: center;
+}
+
+/* The body keeps its full width so the shrinking sidebar clips it — content
+   slides out of view instead of squishing mid-transition. `visibility` flips
+   after the fade, taking the hidden side out of tab order. */
+.workspace-sidebar__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 240px;
+  min-width: 240px;
+  min-height: 0;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.15s ease 0.08s,
+    visibility 0s;
+}
+
+.workspace-sidebar--collapsed .workspace-sidebar__body {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s ease,
+    visibility 0s 0.15s;
 }
 
 .workspace-sidebar__expand {
-  width: 100%;
-  height: 36px;
+  position: absolute;
+  top: 6px;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
   border: none;
   background: transparent;
   color: inherit;
   cursor: pointer;
   font-size: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s ease,
+    visibility 0s 0.15s;
+}
+
+.workspace-sidebar--collapsed .workspace-sidebar__expand {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.15s ease 0.12s,
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-sidebar,
+  .workspace-sidebar__body,
+  .workspace-sidebar__expand {
+    transition: none;
+  }
 }
 
 .workspace-sidebar__header {
@@ -141,7 +193,10 @@
 }
 
 .workspace-row__icon {
+  display: inline-flex;
   flex: none;
+  align-items: center;
+  font-size: 14px;
 }
 
 .workspace-row__name {
@@ -200,6 +255,9 @@
 }
 
 .workspace-empty__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 14px;
   border: 1px solid transparent;
   border-radius: 8px;
