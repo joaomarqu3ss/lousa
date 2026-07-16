@@ -1,0 +1,565 @@
+/*
+ * Workspace shell (issue #6): file-tree sidebar, editor tab strip and the
+ * placeholder note editor. Structural rules here are theme-agnostic; the color
+ * rules live under the ancestor .theme-dark / .theme-light classes the app puts
+ * on the shell root.
+ */
+
+/* ---- Sidebar ------------------------------------------------------------ */
+
+.workspace-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  min-width: 240px;
+  height: 100%;
+  overflow: hidden;
+  border-right: 1px solid transparent;
+  font-family:
+    Assistant,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  font-size: 13px;
+  user-select: none;
+}
+
+.workspace-sidebar--collapsed {
+  width: 32px;
+  min-width: 32px;
+  align-items: center;
+}
+
+.workspace-sidebar__expand {
+  width: 100%;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.workspace-sidebar__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid transparent;
+}
+
+.workspace-sidebar__title {
+  flex: 1;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.workspace-sidebar__actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+}
+
+.workspace-sidebar__actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.workspace-sidebar__actions button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* ---- Tree --------------------------------------------------------------- */
+
+.workspace-tree {
+  flex: 1;
+  margin: 0;
+  padding: 6px 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.workspace-tree__children {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workspace-tree__hint {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.workspace-row-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.workspace-row {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workspace-row__caret {
+  flex: none;
+  width: 12px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.workspace-row__icon {
+  flex: none;
+}
+
+.workspace-row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-row__actions {
+  display: none;
+  flex: none;
+  gap: 2px;
+  padding-right: 6px;
+}
+
+.workspace-row-wrap:hover .workspace-row__actions,
+.workspace-row__actions:focus-within {
+  display: flex;
+}
+
+.workspace-row__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* ---- Empty state -------------------------------------------------------- */
+
+.workspace-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+
+.workspace-empty__text {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.workspace-empty__button {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ---- Editor tabs -------------------------------------------------------- */
+
+.editor-tabs {
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  overflow-x: auto;
+  border-bottom: 1px solid transparent;
+  font-family:
+    Assistant,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  font-size: 13px;
+}
+
+.editor-tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  max-width: 200px;
+  padding: 0 10px;
+  border-right: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.editor-tab__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editor-tab__dirty {
+  flex: none;
+  font-size: 10px;
+}
+
+.editor-tab__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ---- Note editor -------------------------------------------------------- */
+
+.note-editor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.note-editor__textarea {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: none;
+}
+
+.note-editor__hint {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ---- Rename dialog (overlay reuses .settings-backdrop from App.css) ----- */
+
+.rename-modal {
+  display: flex;
+  min-width: 300px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.rename-modal__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.rename-modal__input {
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.rename-modal__error {
+  margin: 0;
+  font-size: 12px;
+}
+
+.rename-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rename-modal__actions button {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.rename-modal__actions button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* ---- Dark theme --------------------------------------------------------- */
+
+.theme-dark .rename-modal {
+  background: #1f1f24;
+  color: #e4e4e7;
+}
+
+.theme-dark .rename-modal__input {
+  border-color: #2d2d34;
+  background: #121214;
+  color: #e4e4e7;
+}
+
+.theme-dark .rename-modal__error {
+  color: #f0a8a8;
+}
+
+.theme-dark .rename-modal__actions button:hover:not(:disabled) {
+  background: #26262b;
+}
+
+.theme-dark .rename-modal__confirm {
+  border-color: #7fd4c6;
+  color: #7fd4c6;
+}
+
+.theme-dark .workspace-sidebar {
+  border-right-color: #2d2d34;
+  background: #1a1a1e;
+  color: #e4e4e7;
+}
+
+.theme-dark .workspace-sidebar__header {
+  border-bottom-color: #2d2d34;
+}
+
+.theme-dark .workspace-sidebar__actions button:hover:not(:disabled),
+.theme-dark .workspace-sidebar__expand:hover {
+  background: #26262b;
+}
+
+.theme-dark .workspace-row:hover {
+  background: #26262b;
+}
+
+.theme-dark .workspace-row--active {
+  background: #2d2d34;
+  color: #7fd4c6;
+}
+
+.theme-dark .workspace-row__action:hover {
+  background: #3a3a42;
+}
+
+.theme-dark .workspace-empty__button {
+  border-color: #2d2d34;
+  color: #7fd4c6;
+}
+
+.theme-dark .workspace-empty__button:hover {
+  background: #26262b;
+}
+
+.theme-dark .editor-tabs {
+  border-bottom-color: #2d2d34;
+  background: #1a1a1e;
+  color: #e4e4e7;
+}
+
+.theme-dark .editor-tab {
+  border-right-color: #2d2d34;
+  color: #a1a1aa;
+}
+
+.theme-dark .editor-tab:hover {
+  background: #26262b;
+}
+
+.theme-dark .editor-tab--active {
+  background: #2d2d34;
+  color: #e4e4e7;
+  box-shadow: inset 0 -2px 0 #7fd4c6;
+}
+
+.theme-dark .editor-tab__dirty {
+  color: #7fd4c6;
+}
+
+.theme-dark .editor-tab__close:hover {
+  background: #3a3a42;
+}
+
+.theme-dark .note-editor {
+  background: #1a1a1e;
+}
+
+.theme-dark .note-editor__textarea {
+  color: #e4e4e7;
+}
+
+.theme-dark .note-editor__hint {
+  background: #26262b;
+  color: #a1a1aa;
+}
+
+/* ---- Light theme -------------------------------------------------------- */
+
+.theme-light .rename-modal {
+  background: #ffffff;
+  color: #18181b;
+}
+
+.theme-light .rename-modal__input {
+  border-color: #e4e4e7;
+  background: #ffffff;
+  color: #18181b;
+}
+
+.theme-light .rename-modal__error {
+  color: #b3261e;
+}
+
+.theme-light .rename-modal__actions button:hover:not(:disabled) {
+  background: #ececee;
+}
+
+.theme-light .rename-modal__confirm {
+  border-color: #2f8f83;
+  color: #2f8f83;
+}
+
+.theme-light .workspace-sidebar {
+  border-right-color: #e4e4e7;
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+.theme-light .workspace-sidebar__header {
+  border-bottom-color: #e4e4e7;
+}
+
+.theme-light .workspace-sidebar__actions button:hover:not(:disabled),
+.theme-light .workspace-sidebar__expand:hover {
+  background: #ececee;
+}
+
+.theme-light .workspace-row:hover {
+  background: #ececee;
+}
+
+.theme-light .workspace-row--active {
+  background: #e4e4e7;
+  color: #2f8f83;
+}
+
+.theme-light .workspace-row__action:hover {
+  background: #dcdce0;
+}
+
+.theme-light .workspace-empty__button {
+  border-color: #e4e4e7;
+  color: #2f8f83;
+}
+
+.theme-light .workspace-empty__button:hover {
+  background: #ececee;
+}
+
+.theme-light .editor-tabs {
+  border-bottom-color: #e4e4e7;
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+.theme-light .editor-tab {
+  border-right-color: #e4e4e7;
+  color: #52525b;
+}
+
+.theme-light .editor-tab:hover {
+  background: #ececee;
+}
+
+.theme-light .editor-tab--active {
+  background: #ffffff;
+  color: #18181b;
+  box-shadow: inset 0 -2px 0 #2f8f83;
+}
+
+.theme-light .editor-tab__dirty {
+  color: #2f8f83;
+}
+
+.theme-light .editor-tab__close:hover {
+  background: #dcdce0;
+}
+
+.theme-light .note-editor {
+  background: #ffffff;
+}
+
+.theme-light .note-editor__textarea {
+  color: #18181b;
+}
+
+.theme-light .note-editor__hint {
+  background: #ececee;
+  color: #52525b;
+}

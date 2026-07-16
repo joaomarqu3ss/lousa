@@ -6,10 +6,39 @@ body,
   overflow: hidden;
 }
 
-.canvas-root {
-  height: 100vh;
-  width: 100vw;
+/* Workspace shell (issue #6): sidebar + tabbed main area. */
+.app-shell {
+  position: relative;
+  display: flex;
+  height: 100%;
 }
+
+.workspace-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.workspace-content {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The Canvas stays mounted for the app's lifetime — it is hidden, not
+   destroyed, when a Note tab is active. Unmounting it would drop the scene. */
+.workspace-canvas,
+.workspace-note {
+  position: absolute;
+  inset: 0;
+}
+
+/* Rename dialog styles live with the rest of the workspace shell in
+   src/components/workspace.css; the modal reuses .settings-backdrop (below)
+   for its overlay. */
 
 /*
  * Lousa "chalk teal" accent palette.
