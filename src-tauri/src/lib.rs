@@ -11,8 +11,12 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            fs::read_document,
-            fs::save_document,
+            fs::read_text_file,
+            fs::save_text_file,
+            fs::read_workspace_dir,
+            fs::new_note,
+            fs::rename_path,
+            fs::delete_path,
             export::write_binary_file,
             export::export_pdf,
             mcp::server::mcp_tool_result,

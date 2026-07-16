@@ -1,7 +1,8 @@
 /**
- * IPC wrappers for document file operations. Rust owns all file I/O and
- * native dialogs (ADR-0003); this module is the only place the frontend
- * touches those commands.
+ * IPC wrappers for Document file operations. Rust owns all file I/O and native
+ * dialogs (ADR-0003); its `read_text_file`/`save_text_file` commands are
+ * generic primitives that each frontend module wraps in its own domain
+ * vocabulary — Documents here, Notes in `workspace.ts` (CONTEXT.md language).
  */
 
 import { invoke } from "@tauri-apps/api/core";
@@ -11,11 +12,11 @@ import { ensureExcalidrawExtension } from "./title";
 const FILTERS = [{ name: "Excalidraw document", extensions: ["excalidraw"] }];
 
 export function readDocument(path: string): Promise<string> {
-  return invoke<string>("read_document", { path });
+  return invoke<string>("read_text_file", { path });
 }
 
 export function saveDocument(path: string, contents: string): Promise<void> {
-  return invoke<void>("save_document", { path, contents });
+  return invoke<void>("save_text_file", { path, contents });
 }
 
 export async function pickOpenPath(): Promise<string | null> {

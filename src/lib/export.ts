@@ -76,7 +76,7 @@ export async function exportScene(
   if (!path) return null;
 
   if (format === "svg") {
-    await invoke("save_document", { path, contents: await serializeSvg(api, true) });
+    await invoke("save_text_file", { path, contents: await serializeSvg(api, true) });
   } else if (format === "pdf") {
     await invoke("export_pdf", { path, svg: await serializeSvg(api, false) });
   } else {
