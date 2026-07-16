@@ -12,6 +12,18 @@ _Avoid_: whiteboard, board, scene
 A single Canvas saved as one file on disk; the unit a user opens, edits, and saves.
 _Avoid_: drawing, sketch, project
 
+**Workspace**:
+The folder Lousa opens, surfaced through a minimizable sidebar that shows only the files Lousa understands — Documents (`.excalidraw`) and Notes (`.md`) — while ignoring everything else in the folder.
+_Avoid_: vault, project, repository
+
+**Note**:
+A single Markdown file (`.md`) in the Workspace, edited in Lousa with inline live preview. The file on disk is the source of truth; Lousa keeps no separate copy and never transforms it into the Canvas format.
+_Avoid_: page, card, document (that is the Canvas)
+
+**Link**:
+A connection Lousa reads as a graph edge — a Canvas element pointing at a Note (`element.link`), or one Note referencing another through a standard Markdown link. The structure the raw files don't carry, which the Agent Bridge exposes to the agent.
+_Avoid_: reference, backlink, tag
+
 **Module**:
 An independent domain tool for a field of study (e.g. the Cartesian function plotter) that runs beside the Canvas and places its results onto it.
 _Avoid_: plugin, extension, tool
@@ -29,5 +41,5 @@ The platform capability that exposes the live Canvas to an external AI agent ove
 _Avoid_: plugin, AI Module, assistant
 
 **Checkpoint**:
-The snapshot of the Canvas taken before an Agent Bridge turn's first write, restored atomically by "Revert AI changes".
+The snapshot taken before an Agent Bridge turn's first write — the Canvas, and any Note files the turn touches — restored atomically by "Revert AI changes".
 _Avoid_: backup, save point, undo
