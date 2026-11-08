@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Lousa",
-  "version": "0.2.0",
+  "version": "0.3.0-beta.1",
   "identifier": "io.github.joaomarqu3ss.lousa",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -25,7 +25,11 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "appimage", "deb", "rpm"],
+    "targets": ["nsis", "appimage", "deb", "rpm", "dmg"],
+    "macOS": {
+      "minimumSystemVersion": "15.0",
+      "bundleVersion": "0.3.0"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

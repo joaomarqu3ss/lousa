@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +27,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -59,3 +60,7 @@ jobs:
       - name: Build Tauri bundles (Windows)
         if: runner.os == 'Windows'
         run: pnpm tauri build --bundles nsis
+
+      - name: Build Tauri bundle (macOS universal)
+        if: runner.os == 'macOS'
+        run: pnpm tauri build --target universal-apple-darwin --bundles dmg

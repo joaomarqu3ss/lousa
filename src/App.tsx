@@ -33,6 +33,8 @@ const gearIcon = (
   </svg>
 );
 
+const shortcutModifier = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl+";
+
 function App() {
   const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null);
@@ -211,16 +213,16 @@ function App() {
         onChange={() => setDirty(currentVersion() !== savedVersion.current)}
       >
         <MainMenu>
-          <MainMenu.Item onSelect={() => void newDocument()} shortcut="Ctrl+N">
+          <MainMenu.Item onSelect={() => void newDocument()} shortcut={`${shortcutModifier}N`}>
             New
           </MainMenu.Item>
-          <MainMenu.Item onSelect={() => void openDocument()} shortcut="Ctrl+O">
+          <MainMenu.Item onSelect={() => void openDocument()} shortcut={`${shortcutModifier}O`}>
             Open…
           </MainMenu.Item>
-          <MainMenu.Item onSelect={() => void save()} shortcut="Ctrl+S">
+          <MainMenu.Item onSelect={() => void save()} shortcut={`${shortcutModifier}S`}>
             Save
           </MainMenu.Item>
-          <MainMenu.Item onSelect={() => void saveAs()} shortcut="Ctrl+Shift+S">
+          <MainMenu.Item onSelect={() => void saveAs()} shortcut={`${shortcutModifier}Shift+S`}>
             Save As…
           </MainMenu.Item>
           <MainMenu.Separator />
@@ -236,7 +238,11 @@ function App() {
           </MainMenu.Group>
           <MainMenu.Separator />
           <MainMenu.DefaultItems.ChangeCanvasBackground />
-          <MainMenu.Item icon={gearIcon} onSelect={() => setSettingsOpen(true)} shortcut="Ctrl+,">
+          <MainMenu.Item
+            icon={gearIcon}
+            onSelect={() => setSettingsOpen(true)}
+            shortcut={`${shortcutModifier},`}
+          >
             Settings…
           </MainMenu.Item>
         </MainMenu>
