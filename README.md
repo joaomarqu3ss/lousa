@@ -25,7 +25,7 @@ for the full v1 scope.
 
 ## Stack
 
-- **Tauri 2** — Rust backend, system webview, Windows + Linux (macOS later)
+- **Tauri 2** — Rust backend, system webview, Windows + Linux and macOS preview
 - **React 19 + TypeScript** (Vite, pnpm) — embeds `@excalidraw/excalidraw`, fully offline
 - Rust owns native work: file I/O with atomic saves, and vector PDF export
 
@@ -110,7 +110,18 @@ Prerequisites: Node 22+, pnpm, the Rust toolchain, and the
 pnpm tauri build
 ```
 
-Produces installers per OS: NSIS (Windows); AppImage, `.deb`, and `.rpm` (Linux).
+Produces installers per OS: NSIS (Windows); AppImage, `.deb`, and `.rpm` (Linux);
+and `.dmg` (macOS). The macOS preview requires macOS 15 or later. A universal
+build for Apple Silicon and Intel can be produced on a Mac with both Rust targets:
+
+```sh
+rustup target add aarch64-apple-darwin x86_64-apple-darwin
+pnpm tauri build --target universal-apple-darwin --bundles dmg
+```
+
+The preview is not signed with an Apple Developer ID or notarized; see
+[Apple's instructions](https://support.apple.com/en-us/102445) if macOS blocks
+it. Intel hardware and macOS 15 have not yet been tested.
 
 ## License
 
